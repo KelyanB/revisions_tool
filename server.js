@@ -66,7 +66,7 @@ Donne uniquement le HTML de la fiche, sans texte explicatif autour.
 `;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
     });
 
     const result = await model.generateContent(prompt);
