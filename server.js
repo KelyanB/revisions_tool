@@ -2,11 +2,22 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import multer from "multer";
+import admin from "firebase-admin";
+import serviceAccountJson from "./serviceAccountKey.json" assert { type: "json" };
 
 dotenv.config();
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+
+// Initialize Firebase Admin
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccountJson),
+  storageBucket: "revisions-cours.appspot.com",
+});
+
+const storage = admin.storage();
 
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
@@ -19,6 +30,9 @@ const genAI = new GoogleGenerativeAI(apiKey);
 app.use(cors());
 app.use(express.json());
 
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Endpoint Gemini
 app.post("/api/generate-summary", async (req, res) => {
   try {
     console.log("Requête reçue sur /api/generate-summary");
@@ -79,6 +93,32 @@ Donne uniquement le HTML de la fiche, sans texte explicatif autour.
     res
       .status(500)
       .json({ error: "Erreur lors de la génération de la fiche via l'IA." });
+  }
+});
+
+// Endpoint d'upload PDF
+app.post("/api/upload-pdf", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Aucun fichier reçu" });
+  }
+
+  try {
+    const bucket = storage.bucket();
+    const fileName = `pdfs/${Date.now()}_${req.file.originalname}`;
+    const file = bucket.file(fileName);
+
+    await file.save(req.file.buffer, {
+      metadata: {
+        contentType: req.file.mimetype,
+      },
+    });
+
+    const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
+
+    res.json({ fileUrl: url });
+  } catch (err) {
+    console.error("Erreur upload PDF:", err);
+    res.status(500).json({ error: "Erreur lors de l'upload du PDF" });
   }
 });
 
