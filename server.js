@@ -39,31 +39,27 @@ app.use(express.json());
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/api/extract-pdf-text", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Aucun fichier PDF reçu" });
+  }
 
-if (!req.file) {
+  try {
+    const data = await pdfParse(req.file.buffer);
+    const text = data.text || "";
 
-text
-return res.status(400).json({ error: "Aucun fichier PDF reçu" });
-}
+    if (!text.trim()) {
+      return res
+        .status(400)
+        .json({ error: "Impossible d'extraire du texte de ce PDF." });
+    }
 
-try {
-// req.file.buffer contient les octets du PDF
-const data = await pdfParse(req.file.buffer);
-const text = data.text || "";
-if (!text.trim()) {
-  return res
-    .status(400)
-    .json({ error: "Impossible d'extraire du texte de ce PDF." });
-}
-res.json({ text });
-} catch (err) {
-
-console.error("Erreur extraction PDF:", err);
-res
-  .status(500)
-  .json({ error: "Erreur lors de l'extraction du texte du PDF." });
-}
-
+    res.json({ text });
+  } catch (err) {
+    console.error("Erreur extraction PDF:", err);
+    res
+      .status(500)
+      .json({ error: "Erreur lors de l'extraction du texte du PDF." });
+  }
 });
 
 // Endpoint Gemini
@@ -159,6 +155,7 @@ app.post("/api/upload-pdf", upload.single("file"), async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend en écoute sur http://localhost:${PORT}`);
 });
+
 
 
 
