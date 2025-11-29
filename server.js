@@ -54,7 +54,7 @@ app.post("/api/generate-summary", async (req, res) => {
 
        const prompt = `
 Tu es un professeur de Licence Professionnelle Banque.
-Ton rôle est de transformer la prise de notes ci‑dessous en fiche de révision, SANS ajouter de connaissances extérieures ni inventer d'informations.
+Ton rôle est de transformer la prise de notes ci‑dessous en fiche de révision, principalement basée sur ces notes (pas d'ajout massif de connaissances extérieures).
 
 Nom du cours : ${name}
 Description du cours :
@@ -63,31 +63,23 @@ ${description}
 Consignes d'organisation données par l'étudiant :
 ${details}
 
-Texte de prise de notes (source UNIQUE, à respecter strictement) :
+Texte de prise de notes (source principale) :
 """
 ${baseText}
 """
 
-Règles OBLIGATOIRES :
-- Tu dois te baser EXCLUSIVEMENT sur le texte de prise de notes ci‑dessus.
-- N'ajoute PAS de définitions, d'exemples, de théories ou de parties qui ne sont pas présentes dans le texte de prise de notes.
-- Si une notion n'apparaît pas dans le texte de prise de notes, tu ne l'inventes pas.
-- Tu peux reformuler et réorganiser, mais le contenu doit rester équivalent à celui de la prise de notes.
-- Tu dois conserver toutes les informations importantes présentes dans le texte initial (rien d'essentiel ne doit disparaître).
+Règles :
+- Tu peux réorganiser, clarifier et compléter légèrement pour que la fiche soit plus pédagogique.
+- Tu peux ajouter de petits résumés, des exemples simples ou des mises en forme si cela aide à comprendre.
+- Tu peux représenter les schémas ou tableaux du cours sous forme de listes structurées ou de pseudo-tableaux en texte.
+- Ne change pas le sens du cours et ne t'éloigne pas du contenu présenté dans la prise de notes.
 
-Format de la fiche (HTML simple uniquement) :
-- Un titre principal du cours en <h1>.
-- Parties numérotées en <h2> (1., 2., 3., ...), correspondant aux grandes sections du cours dans les notes.
-- Sous-parties en <h3> si nécessaire.
-- Listes à puces avec <ul><li> pour les définitions, exemples, points clés.
-- Mets en évidence les notions importantes avec <strong>.
-- Pas de balises <html>, <head> ou <body>, uniquement le contenu à afficher.
-- Style concis, adapté à un étudiant qui révise la Licence Pro Banque.
-- Fiche en français.
-
-Important :
-- Ta mission est de faire une fiche de révision propre, claire et structurée, mais basée UNIQUEMENT sur le texte fourni.
-- Ne rajoute pas d'éléments extérieurs, même si tu connais le sujet.
+Format de sortie :
+- Utilise un HTML lisible dans une page web : <h1>, <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>, <table>, <tr>, <td> si nécessaire.
+- Pas de balises <html>, <head> ou <body>, uniquement le contenu.
+- Titre principal en <h1>.
+- Parties numérotées en <h2> (1., 2., 3., ...).
+- Tu peux utiliser des listes, des tableaux ou des encadrés (sous forme de <div> avec un titre) pour représenter les schémas.
 
 Donne UNIQUEMENT le HTML de la fiche, sans texte explicatif autour.
 `;
@@ -138,6 +130,7 @@ app.post("/api/upload-pdf", upload.single("file"), async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend en écoute sur http://localhost:${PORT}`);
 });
+
 
 
 
