@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import multer from "multer";
 import admin from "firebase-admin";
 import fs from "fs";
+import pdfParse from "pdf-parse";
 
 const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT 
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
@@ -130,6 +131,7 @@ app.post("/api/upload-pdf", upload.single("file"), async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend en écoute sur http://localhost:${PORT}`);
 });
+
 
 
 
