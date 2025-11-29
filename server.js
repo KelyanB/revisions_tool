@@ -5,7 +5,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import multer from "multer";
 import admin from "firebase-admin";
 import fs from "fs";
-import pdfParse from "pdf-parse";
+import pkg from "pdf-parse";
+const pdfParse = pkg;
 
 const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT 
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
@@ -61,6 +62,7 @@ app.post("/api/extract-pdf-text", upload.single("file"), async (req, res) => {
       .json({ error: "Erreur lors de l'extraction du texte du PDF." });
   }
 });
+
 
 // Endpoint Gemini
 app.post("/api/generate-summary", async (req, res) => {
@@ -155,6 +157,7 @@ app.post("/api/upload-pdf", upload.single("file"), async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend en écoute sur http://localhost:${PORT}`);
 });
+
 
 
 
